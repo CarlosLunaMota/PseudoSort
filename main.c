@@ -33,9 +33,6 @@ int BubblePseudoSort(int *array, int length) {
 //
 // Returns 1 if data is already sorted, returns 0 if more work is needed:
 //
-// Uses and auxiliary array "aux" to avoid keep allocating and freeing memory
-// but this is an optimization rather than something required by the algorithm.
-//
 int NaturalMergePseudoSort(int *array, int length) {
 
     int ini, mid, end;
