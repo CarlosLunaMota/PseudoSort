@@ -123,8 +123,8 @@ void Sort(int PseudoSortFunc(int *array, int length), int *array, int length) {
     for (i = 0; i < length-1; i++) { assert(array[i] <= array[i+1]); }
 }
 
-// Performs a single pass of Bubble Sort over the data (increasing by at least
-// one the number of elements that are in their final position).
+// Performs a single pass of Bubble Sort over the data (increasing the number
+// of elements that are in their final position).
 //
 // Returns 1 if data is already sorted, returns 0 otherwise.
 //
@@ -147,46 +147,8 @@ int BubblePseudoSort(int *array, int length) {
     return sorted;
 }
 
-// Performs a single pass of Cocktail Sort over the data (increasing by at least
-// two the number of elements that are in their final position).
-//
-// Returns 1 if data is already sorted, returns 0 otherwise.
-//
-int CocktailPseudoSort(int *array, int length) {
-
-    int sorted = 1;     // Boolean
-    int i;              // Index variable
-    int aux;            // Same type of array content
-
-    // Bubble Up:
-    for (i = 1; i < length; i++) {
-        if (array[i-1] > array[i]) {
-            aux        = array[i-1];
-            array[i-1] = array[i];
-            array[i]   = aux;
-            sorted     = 0;
-        }
-    }
-
-    // Check if it is already sorted:
-    if (sorted) { return sorted; }
-    else        { sorted = 1;    }
-
-    // Bubble Down:
-    for (i = length-1; i > 0; i--) {
-        if (array[i-1] > array[i]) {
-            aux        = array[i-1];
-            array[i-1] = array[i];
-            array[i]   = aux;
-            sorted     = 0;
-        }
-    }
-
-    return sorted;
-}
-
-// Performs a double pass of Heapify over the data (increasing by at least one
-// the length of the largest run in the array).
+// Performs a single pass of Heapify over the data (decreasing the number of
+// inversions in the array).
 //
 // Returns 1 if data is already sorted, returns 0 otherwise.
 //
@@ -195,15 +157,15 @@ int HeapifyPseudoSort(int *array, int length) {
     int root, parent, child, ind;   // Index variables
     int aux;                        // Same type of array content
     
-    // Find the pivot (=first step-down):
-    for (ind = 0; ind < length-2 && array[ind] <= array[ind+1]; ind++);
+    // Find the end of the first run:
+    for (ind = 1; ind < length && array[ind-1] <= array[ind]; ind++);
 
-    // If it is already sorted we can return:
-    if (ind == length-1) { return 1; }
+    // If we are done return:
+    if (ind == length) { return 1; }
 
-    // Otherwise we must try to guess the correct index of the pivot:
+    // Now find the correct place to insert this element: 
     aux = array[ind];
-    while (ind > 1 && array[ind-1] > aux) { ind--; }
+    for (ind = 0; ind < length && aux >= array[ind]; ind++);
     
     // Min-Heapifiy [ind,length-1] so array[ind] == min(array[ind,length-1])
     for (root = length-1; root >= ind; root--) {
@@ -213,33 +175,6 @@ int HeapifyPseudoSort(int *array, int length) {
             if (child >= length) { break; }
             if (child+1 < length && array[child] > array[child+1]) { child++; }
             if (array[parent] <= array[child]) { break; }
-            else {
-                aux           = array[parent];
-                array[parent] = array[child];
-                array[child]  = aux;
-                parent        = child;
-            }
-        }
-    }
-
-    // Find the pivot (=last step-down):
-    for (ind = length-1; ind > 0 && array[ind-1] <= array[ind]; ind--);
-
-    // If it is already sorted we can return now:
-    if (ind == 0) { return 1; }
-
-    // Otherwise we must try to guess the correct index of the pivot:
-    aux = array[ind-1];
-    while (ind < length-1 && array[ind] < aux) { ind++; }
-    
-    // Max-Heapifiy [0,ind] so array[ind] == max(array[0,ind])
-    for (root = 0; root < ind; root++) {
-        parent = root;
-        while (1) {
-            child = ind - ((ind-parent)*2 + 1);
-            if (child < 0) { break; }
-            if (child-1 >= 0 && array[child] < array[child-1]) { child--; }
-            if (array[parent] >= array[child]) { break; }
             else {
                 aux           = array[parent];
                 array[parent] = array[child];
@@ -537,12 +472,30 @@ int main() {
 
     int i, j;
     int length = 100000;
-    int trials = 100;
+    int trials = 10;
     int *array = (int *) malloc(length*sizeof(int));
     clock_t start;
     int cmp(const void * a, const void * b) { return (*(int*)a - *(int*)b); }
 
     printf("\nSorting %d random arrays of %d integers:\n", trials, length);
+
+
+    // Bubble Pseudo-Sort O(n^2)
+    start = clock();
+    for (j = 0; j<trials; j++) {
+        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+        Sort(BubblePseudoSort, array, length);        
+    }
+    printf("\tBubblePseudoSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
+
+
+    // Heapify Pseudo-Sort O(n^2)
+    start = clock();
+    for (j = 0; j<trials; j++) {
+        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+        Sort(HeapifyPseudoSort, array, length);        
+    }
+    printf("\tHeapifyPseudoSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
 
 
     // Binary Insertion Sort O(n^2)
@@ -572,7 +525,6 @@ int main() {
     }
     printf("\tHeapSort:\t\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
 
-    
     // Natural Merge Pseudo-Sort O(n*log(n))
     start = clock();
     for (j = 0; j<trials; j++) {
