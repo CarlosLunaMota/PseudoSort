@@ -1,7 +1,6 @@
 
 #include <stdio.h>      // printf
 #include <stdlib.h>     // rand, malloc, free
-#include <unistd.h>     // sleep
 #include <assert.h>     // assert
 #include <string.h>     // memcpy, memmove
 #include <time.h>       // clock, CLOCKS_PER_SEC
