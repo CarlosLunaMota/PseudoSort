@@ -1,8 +1,8 @@
 
-#include <stdio.h>      // printf
-#include <stdlib.h>     // rand, malloc, free
 #include <assert.h>     // assert
+#include <stdio.h>      // printf
 #include <string.h>     // memcpy, memmove
+#include <stdlib.h>     // rand, malloc, free
 #include <time.h>       // clock, CLOCKS_PER_SEC
 
 
