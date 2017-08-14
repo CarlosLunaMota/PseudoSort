@@ -1,6 +1,9 @@
 # PseudoSorting algorithms
 
-A **pseudosorting algorithm** takes a sequence and returns a permutation of that sequence that is _more sorted_ than the previous one. The precise definition of _more sorted_ it is not important as long as we guarantee that repeated aplications of the same pseudosorting algorithm will eventually sort the sequence and that applying a pseudosorting algorithm to a sorted sequence will leave it sorted.
+A **pseudosorting algorithm** takes a sequence and returns a permutation of that sequence that is _more sorted_ than the previous one. The precise definition of _more sorted_ it is not important as long as we guarantee that:
+
+1. Repeated aplications of the same pseudosorting algorithm will eventually sort the sequence.
+2. Applying a pseudosorting algorithm to a sorted sequence will leave it sorted.
 
 It is also necessary to impose that each application of a pseudosorting algorithm requires (strictly) less than N·log(N) steps to avoid including all sorting algorithms into the pseudosorting category.
 
@@ -35,7 +38,7 @@ void BubblePseudoSort(int *array, int length) {
 }
 ```
 
-We can safely break BubbleSort into a series of independent applications of BubblePseudoSort because it is a very naive sorting algorithm that keeps comparing elements that has previously compared. Other sorting algorithms (like Quicksort, Heapsort or MergeSort) exploit previous comparisons but do so by storing some information (sometimes implicitly) and thus can not be broken into independent applications of a pseudosorting algorithm as easily as BubbleSort.
+We can safely break BubbleSort into a series of independent applications of BubblePseudoSort because it is a very naive sorting algorithm that keeps comparing elements that have been previously compared. Other sorting algorithms (like Quicksort, Heapsort or MergeSort) exploit previous comparisons but do so by storing some information (sometimes implicitly) and thus can not be broken into independent applications of a pseudosorting algorithm as easily as BubbleSort.
 
 For example, QuickSort keeps in memory the position of the previous _pivots_, HeapSort remembers the amount of elements already in their final position and (bottom-up) MergeSort only needs to remember how many iterations has been performed so far.
 
@@ -82,6 +85,8 @@ void NaturalMergePseudoSort(int *array, int length) {
         x = ini;
         while (x<end) { array[x++] = aux[z++]; }
     }
+    
+    // Deallocate aux:
     free(aux); 
 }
 ```
