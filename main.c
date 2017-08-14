@@ -1,3 +1,4 @@
+
 #include <stdio.h>      // printf
 #include <stdlib.h>     // rand, malloc, free
 #include <unistd.h>     // sleep
@@ -6,97 +7,24 @@
 #include <time.h>       // clock, CLOCKS_PER_SEC
 
 
-
-// PRESORTEDNESS MEASURES //////////////////////////////////////////////////////
-
-// Counts the number of inversions of a given array.
-//
-int Inversions(int *array, int length) {
-
-    int inversions = 0;
-
-    for (int i=0; i<length-1; i++) {
-        for (int j=i+1; j<length; j++) {
-            if (array[i] > array[j]) { inversions++; }
-        }
-    }
-
-    return inversions;
-}
-
-// Counts the number of runs of a given array.
-//
-int Runs(int *array, int length) {
-
-    int runs = 1;
-
-    for (int i=0; i<length-1; i++) {
-        if (array[i] > array[i+1]) { runs++; }
-    }
-
-    return runs;
-}
-
-// Computes the length of the longest run.
-//
-int MaxRun(int *array, int length) {
-
-    int max = 0;
-    int run = 1;
-
-    for (int i=0; i<length-1; i++) {
-        if (array[i] <= array[i+1]) { run++; }
-        else {
-            max = (max < run) ? run : max;
-            run = 1;
-        }
-    }
-    
-    return (max < run) ? run : max;
-}
-
-// Computes the length of the first run.
-//
-int FirstRun(int *array, int length) {
-
-    int run = 1;
-
-    for (int i=0; i<length-1; i++) {
-        if (array[i] <= array[i+1]) { run++; }
-        else                        { break; }
-    }
-    
-    return run;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-
 // PSEUDO SORTING FUNCTIONS ////////////////////////////////////////////////////
 
 // Iterative application of a pseudosorting function to sort the array.
 //
 // Returns the number of iterations performed.
 //
-void Sort(int PseudoSortFunc(int *array, int length), int *array, int length) {
+void Sort(int PseudoSortFunc(int *arr, size_t len), int *array, size_t length) {
 
-    int DEBUG = 0;  // Boolean
-    int stop = 0;   // Boolean
-    int iter = 0;   // Integer
-    int i;          // Index variable
+    int    DEBUG = 0;   // Boolean
+    int    stop  = 0;   // Boolean
+    int    iter  = 0;   // Integer
+    size_t i;           // Index variable
 
     // Print Initial State:
-    if (DEBUG) {
-        printf("%4d) Runs:%6d    MaxRun:%6d    FirstRun:%6d    Invs:%10d",
-               iter++, Runs(array, length), MaxRun(array, length),
-               FirstRun(array, length), Inversions(array, length));
-        if (length <= 25) {
-            printf("  ->  [");
-            for (i = 0; i < length-1; i++) { printf("%d, ", array[i]); }
-            printf("%d]", array[length-1]);
-        }
-        printf("\n");
+    if (DEBUG && length <= 25) {
+        printf("%4d)  ->  [", iter++);
+        for (i = 0; i < length-1; i++) { printf("%d, ", array[i]); }
+        printf("%d]\n", array[length-1]);
     }
 
     // Until done:
@@ -106,21 +34,12 @@ void Sort(int PseudoSortFunc(int *array, int length), int *array, int length) {
         stop = PseudoSortFunc(array, length);
 
         // Print Current State:
-        if (DEBUG) {
-            printf("%4d) Runs:%6d    MaxRun:%6d    FirstRun:%6d    Invs:%10d",
-                   iter++, Runs(array, length), MaxRun(array, length),
-                   FirstRun(array, length), Inversions(array, length));
-            if (length <= 25) {
-                printf("  ->  [");
-                for (i = 0; i < length-1; i++) { printf("%d, ", array[i]); }
-                printf("%d]", array[length-1]);
-            }
-            printf("\n");
-        }       
+        if (DEBUG && length <= 25) {
+            printf("%4d)  ->  [", iter++);
+            for (i = 0; i < length-1; i++) { printf("%d, ", array[i]); }
+            printf("%d]\n", array[length-1]);
+        }
     }
-    
-    // Verify:
-    for (i = 0; i < length-1; i++) { assert(array[i] <= array[i+1]); }
 }
 
 // Performs a single pass of Bubble Sort over the data (increasing the number
@@ -128,11 +47,11 @@ void Sort(int PseudoSortFunc(int *array, int length), int *array, int length) {
 //
 // Returns 1 if data is already sorted, returns 0 otherwise.
 //
-int BubblePseudoSort(int *array, int length) {
+int BubblePseudoSort(int *array, size_t length) {
 
-    int sorted = 1;     // Boolean
-    int i;              // Index variable
-    int aux;            // Same type of array content
+    int    sorted = 1;  // Boolean
+    size_t i;           // Index variable
+    int    aux;         // Same type of array content
     
     // Bubble Up:
     for (i = 1; i < length; i++) {
@@ -152,10 +71,10 @@ int BubblePseudoSort(int *array, int length) {
 //
 // Returns 1 if data is already sorted, returns 0 otherwise.
 //
-int HeapifyPseudoSort(int *array, int length) {
+int HeapifyPseudoSort(int *array, size_t length) {
 
-    int root, parent, child, ind;   // Index variables
-    int aux;                        // Same type of array content
+    size_t root, parent, child, ind;    // Index variables
+    int    aux;                         // Same type of array content
     
     // Find the end of the first run:
     for (ind = 1; ind < length && array[ind-1] <= array[ind]; ind++);
@@ -168,8 +87,8 @@ int HeapifyPseudoSort(int *array, int length) {
     for (ind = 0; ind < length && aux >= array[ind]; ind++);
     
     // Min-Heapifiy [ind,length-1] so array[ind] == min(array[ind,length-1])
-    for (root = length-1; root >= ind; root--) {
-        parent = root;
+    for (root = ind+((length-ind)/2); root > ind; root--) {
+        parent = root-1;
         while (1) {
             child = ind + ((parent-ind)*2 + 1);
             if (child >= length) { break; }
@@ -192,12 +111,12 @@ int HeapifyPseudoSort(int *array, int length) {
 //
 // Returns 1 if data is already sorted, returns 0 otherwise.
 //
-int NaturalMergePseudoSort(int *array, int length) {
+int NaturalMergePseudoSort(int *array, size_t length) {
 
-    int x,   y,   z   = 0;                  // Index variables: indices
-    int ini, mid, end = 0;                  // Index variables: limits
-    size_t size = sizeof(int);              // Size of content type
-    int *aux = (int *) malloc(length*size); // Same type of array content
+    size_t x,   y,   z   = 0;                   // Index variables: indices
+    size_t ini, mid, end = 0;                   // Index variables: limits
+    size_t size = sizeof(int);                  // Size of content type
+    int   *aux = (int *) malloc(length*size);   // Same type of array content
 
     // Make a single pass over the data merging pairs of adjacent runs:
     while (end < length) {
@@ -228,7 +147,7 @@ int NaturalMergePseudoSort(int *array, int length) {
     // Copy aux back into array:
     memcpy(array, aux, end*size);
 
-    // Clean & return:
+    // De-allocate aux & return:
     free(aux);
     return (ini == 0);
 }
@@ -239,14 +158,14 @@ int NaturalMergePseudoSort(int *array, int length) {
 
 // SORTING FUNCTIONS ///////////////////////////////////////////////////////////
 
-// Performs a complete Binary Insertion Sort over the data.
+// Performs a complete Insertion Sort over the data.
 //
 // O(N^2) time, O(1) memory, Stable, Fast for small or almost sorted arrays.
 //
-void BinaryInsertionSort(int *array, int length) {
+void InsertionSort(int *array, size_t length) {
 
-    int i, j, left, right;  // Index variables
-    int aux;                // Same type of array content
+    size_t i, j, left, right;   // Index variables
+    int    aux;                 // Same type of array content
 
     for (i = 1; i < length; i++) {
 
@@ -267,23 +186,20 @@ void BinaryInsertionSort(int *array, int length) {
             array[j] = aux;
         }
     }
-    
-    // Verify:
-    for (i = 0; i < length-1; i++) { assert(array[i] <= array[i+1]); }
 }
 
 // Performs a complete Heap Sort over the data.
 //
 // O(N*log(N)) time, O(1) memory, Unstable.
 //
-void HeapSort(int *array, int length) {
+void HeapSort(int *array, size_t length) {
 
-    int parent, child, i;   // Index variables
-    int aux;                // Same type of array content
+    size_t parent, child, i;    // Index variables
+    int    aux;                 // Same type of array content
 
     // Heapify the array:
-    for (i = (length-2)/2; i >= 0; i--) {
-        parent = i;
+    for (i = length/2; i > 0; i--) {
+        parent = i-1;
         while (1) {
             child = parent*2 + 1;
             if (child > length-1) { break; }
@@ -317,9 +233,6 @@ void HeapSort(int *array, int length) {
             }
         }
     }
-    
-    // Verify:
-    for (i = 0; i < length-1; i++) { assert(array[i] <= array[i+1]); }
 }
 
 // Performs a complete Natural Merge Sort over the data.
@@ -328,14 +241,14 @@ void HeapSort(int *array, int length) {
 //
 // It is equivalent but more efficient than:
 //
-//      for (stop = 0; !stop; stop = NaturalMergePseudoSort(array, length);
+//      for (stop = 0; !stop; stop = NaturalMergePseudoSort(array, length));
 //
-void NaturalMergeSort(int *array, int length) {
+void NaturalMergeSort(int *array, size_t length) {
 
-    int x, y, z;                            // Index variables: indices
-    int end, mid, ini = length;             // Index variables: limits
-    size_t size = sizeof(int);              // Size of content type
-    int *aux = (int *) malloc(length*size); // Same type of array content
+    size_t x, y, z;                             // Index variables: indices
+    size_t end, mid, ini = length;              // Index variables: limits
+    size_t size = sizeof(int);                  // Size of array type
+    int   *aux = (int *) malloc(length*size);   // Same type of array content
 
     // While data is not fully sorted:
     while (ini > 0) {
@@ -388,21 +301,18 @@ void NaturalMergeSort(int *array, int length) {
 
     // De-allocate aux:
     free(aux);
-
-    // Verify:
-    for (x = 0; x < length-1; x++) { assert(array[x] <= array[x+1]); }
 }
 
 // Performs a complete (Bottom Up) Merge Sort over the data.
 //
 // O(N*log(N)) time, O(N) memory, Stable.
 //
-void MergeSort(int *array, int length) {
+void MergeSort(int *array, size_t length) {
 
-    int x, y, z, step = 1;                  // Index variables: indices
-    int end, mid, ini = length;             // Index variables: limits
-    size_t size = sizeof(int);              // Size of content type
-    int *aux = (int *) malloc(length*size); // Same type of array content
+    size_t x, y, z, step = 1;                   // Index variables: indices
+    size_t end, mid, ini = length;              // Index variables: limits
+    size_t size = sizeof(int);                  // Size of array type
+    int   *aux = (int *) malloc(length*size);   // Same type of array content
 
     // While data is not fully sorted:
     while (ini > 0) {
@@ -457,9 +367,6 @@ void MergeSort(int *array, int length) {
 
     // De-allocate aux:
     free(aux);
-
-    // Verify:
-    for (x = 0; x < length-1; x++) { assert(array[x] <= array[x+1]); }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -470,96 +377,96 @@ void MergeSort(int *array, int length) {
 
 int main() {
 
-    int i, j;
-    int length = 100000;
-    int trials = 10;
-    int *array = (int *) malloc(length*sizeof(int));
+    size_t  l, length = 10000;
+    int     t, trials = 100;
+    int    *array = (int *) malloc(length*sizeof(int));
     clock_t start;
-    int cmp(const void * a, const void * b) { return (*(int*)a - *(int*)b); }
+    int     cmp(const void *a, const void *b) { return (*(int*)a - *(int*)b); }
+    double  elapsed(clock_t s) { return ((double)(clock()-s)/CLOCKS_PER_SEC); }
 
-    printf("\nSorting %d random arrays of %d integers:\n", trials, length);
-
+    printf("\nSorting %d random arrays of %zu integers:\n\n", trials, length);
 
     // Bubble Pseudo-Sort O(n^2)
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
-        Sort(BubblePseudoSort, array, length);        
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
+        Sort(BubblePseudoSort, array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tBubblePseudoSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
-
+    printf("\tBubblePseudoSort:\t%6.2f s\n", elapsed(start));
 
     // Heapify Pseudo-Sort O(n^2)
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
-        Sort(HeapifyPseudoSort, array, length);        
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
+        Sort(HeapifyPseudoSort, array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tHeapifyPseudoSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
-
-
-    // Binary Insertion Sort O(n^2)
+    printf("\tHeapifyPseudoSort:\t%6.2f s\n", elapsed(start));
+      
+    // Insertion Sort O(n^2)
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
-        BinaryInsertionSort(array, length);
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
+        InsertionSort(array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tBinaryInsertionSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
+    printf("\tInsertionSort:\t\t%6.2f s\n", elapsed(start));
 
-
-    // Heapify + Insertion Sort O(n^2)
+    // Heapify Pseudo-Sort + Insertion Sort O(n^2)
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
         HeapifyPseudoSort(array, length);
-        BinaryInsertionSort(array, length);
+        InsertionSort(array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tHeapify+InsertionSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
+    printf("\tHeapify+InsertionSort:\t%6.2f s\n", elapsed(start));
         
-
     // Heap Sort O(n*log(n))
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
         HeapSort(array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tHeapSort:\t\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
+    printf("\tHeapSort:\t\t%6.2f s\n", elapsed(start));
 
     // Natural Merge Pseudo-Sort O(n*log(n))
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
-        Sort(NaturalMergePseudoSort, array, length);        
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
+        Sort(NaturalMergePseudoSort, array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tNaturalMergePseudoSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
-
+    printf("\tNaturalMergePseudoSort:\t%6.2f s\n", elapsed(start));
 
     // Natural Merge Sort O(n*log(n))
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
         NaturalMergeSort(array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tNaturalMergeSort:\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
-
+    printf("\tNaturalMergeSort:\t%6.2f s\n", elapsed(start));
 
     // Merge Sort O(n*log(n))
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
         MergeSort(array, length);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tMergeSort:\t\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
-
+    printf("\tMergeSort:\t\t%6.2f s\n", elapsed(start));
 
     // Quick Sort O(n*log(n))
     start = clock();
-    for (j = 0; j<trials; j++) {
-        for (i = 0; i < length; i++) { array[i] = rand() % length; }
+    for (t = 0; t<trials; t++) {
+        for (l = 0; l < length; l++) { array[l] = rand() % length; }
         qsort(array, length, sizeof(int), cmp);
+        for (l = 1; l < length; l++) { assert(array[l-1] <= array[l]); }
     }
-    printf("\tC qsort:\t\t%6.2f s\n", (double)(clock()-start)/CLOCKS_PER_SEC);
-
+    printf("\tC qsort:\t\t%6.2f s\n\n", elapsed(start));
 
     // Clean & Return:
     free(array);
