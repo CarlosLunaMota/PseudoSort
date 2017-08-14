@@ -144,7 +144,7 @@ int NaturalMergePseudoSort(int *array, size_t length) {
         if (y < end) { memcpy(&aux[z], &array[y], (end-y)*size); z += end-y; }
     }
 
-    // Copy aux back into array:
+    // Copy aux[0, end) back into array:
     memcpy(array, aux, end*size);
 
     // De-allocate aux & return:
