@@ -26,9 +26,12 @@ Any _memoryless_ sorting algorithm that performs several iterations over the dat
 For example, we can use a _single pass_ of **BubbleSort** as a pseudosorting algorithm and call it **BubblePseudoSort**:
 
 ```c
-void BubblePseudoSort(int *array, int length) {
-    int i, aux;
-    for (i = 1; i < length; i++) { 
+void BubblePseudoSort(int *array, size_t length) {
+    size_t i;       // Index variable
+    int    aux;     // Same type of array content
+    
+    // Bubble-up
+    for (i = 1; i < length; i++) {
         if (array[i-1] > array[i]) {
             aux        = array[i-1];
             array[i-1] = array[i];
@@ -49,45 +52,44 @@ At this point it seems that it is impossible to have an optimal pseudosorting al
 **Natural MergeSort** is a bottom-up variant of MergeSort that does not require us to store information between iterations. It sorts the data by merging pairs of consecutive runs (incresing subsequences). Therefore, we can easily define **NaturalMergePseudoSort** as:
 
 ```c
-void NaturalMergePseudoSort(int *array, int length) {
+void NaturalMergePseudoSort(int *array, size_t length) {
 
-    int ini, mid, end;
-    int x, y, z;
-    int *aux = (int *) malloc(length * sizeof(int));
+    size_t x,   y,   z   = 0;                   // Index variables: indices
+    size_t ini, mid, end = 0;                   // Index variables: limits
+    size_t size = sizeof(int);                  // Size of content type
+    int   *aux = (int *) malloc(length*size);   // Same type of array content
 
-    // Make a single pass
-    end = 0;
+    // Make a single pass over the data merging pairs of adjacent runs:
     while (end < length) {
 
-        // Find ini:
+        // Find new ini:
         ini = end;
 
-        // Find mid:
-        for (mid=ini+1; mid < length && array[mid-1] <= array[mid]; mid++);
+        // Find new mid:
+        for (mid = ini+1; mid < length && array[mid-1] <= array[mid]; mid++);
+
+        // If we have reached the end of the array we can exit now:
         if (mid == length) { break; }
 
-        // Find end:
-        for (end=mid+1; end < length && array[end-1] <= array[end]; end++);
+        // Find new end:
+        for (end = mid+1; end < length && array[end-1] <= array[end]; end++);
 
-        // Merge [ini,mid) and [mid,end) into aux:
+        // Merge array[ini, mid) with array[mid, end) into aux[z, z+end-ini):
         x = ini;
         y = mid;
-        z = 0;
         while (x < mid && y < end) {
             if (array[x] <= array[y]) { aux[z++] = array[x++]; }
             else                      { aux[z++] = array[y++]; }
         }
-        while (x < mid) { aux[z++] = array[x++]; }
-        while (y < end) { aux[z++] = array[y++]; }
-
-        // Copy aux into [ini,end):
-        z = 0;
-        x = ini;
-        while (x<end) { array[x++] = aux[z++]; }
+        if (x < mid) { memcpy(&aux[z], &array[x], (mid-x)*size); z += mid-x; }
+        if (y < end) { memcpy(&aux[z], &array[y], (end-y)*size); z += end-y; }
     }
-    
-    // Deallocate aux:
-    free(aux); 
+
+    // Copy aux[0, end) back into array:
+    memcpy(array, aux, end*size);
+
+    // De-allocate aux:
+    free(aux);
 }
 ```
 
