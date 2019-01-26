@@ -1,3 +1,6 @@
+//  Content: Some Sorting & Pseudosorting functions.
+//  Author:  Carlos Luna-Mota <el.luna@gmail.com>
+//  Updated: 2018-01-22
 
 #include <assert.h>     // assert
 #include <stdio.h>      // printf
@@ -168,19 +171,21 @@ void InsertionSort(int *array, size_t length) {
 
     for (i = 1; i < length; i++) {
 
-        // Binary search of the insertion point: O(log(i))
-        aux   = array[i];
-        left  = 0;
-        right = i;
-        j     = i/2;
-        while (left < right) {
-            if (aux < array[j]) { right = j;   }
-            else                { left  = j+1; }
-            j = left + (right-left)/2;
-        } 
+        // Skip chunks of sorted data
+        if (array[i] < array[i-1]) {
+        
+            // Binary search of the insertion point: O(log(i))
+            aux   = array[i];
+            left  = 0;
+            right = i;
+            j     = i>>1;
+            while (left < right) {
+                if (aux < array[j]) { right = j;   }
+                else                { left  = j+1; }
+                j = left + ((right-left)>>1);
+            } 
 
-        // Insertion: O(i), but at least as optimized as possible.
-        if (j < i) {
+            // Insertion: O(i), but at least as optimized as possible.
             memmove(&array[j+1], &array[j], (i-j)*sizeof(int));
             array[j] = aux;
         }
